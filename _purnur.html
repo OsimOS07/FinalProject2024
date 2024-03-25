@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: #212135;
+            padding: 0;
+            margin: 0;
+
+        }
+
+        header {
+            background-color: #171728;
+            padding: 1em 2em;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        main {
+            padding: 2em;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            /* justify-content: space-between; */
+            gap: 1em;
+        }
+
+        /* ?form */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1em;
+        }
+
+        input[type="file"] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .file-icon {
+            width: 10em;
+            margin-right: 10px;
+        }
+
+        .file-input-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .text1 {
+            width: fit-content;
+            width: 17em;
+            height: 3em;
+
+            background-color: transparent;
+            border-radius: 2em;
+            border: .1em white solid;
+
+            color: white;
+            padding: .1em 1em;
+        }
+
+        .choose {
+            border-radius: 1em;
+            width: 25em;
+            padding: 3em 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: .1em white solid;
+
+            margin-left: 50em;
+            margin-top: 10em;
+        }
+
+        .submit {
+            border-radius: 24em;
+            width: 8em;
+            height: 2.5em;
+            border-color: transparent;
+            color: white;
+            background-color: #FD749B;
+        }
+
+        .bc {
+            background-color: #00000094;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 130em;
+            height: 70em;
+            z-index: 0;
+        }
+
+        .submitBTN {
+            background-color: #ffffff00 !important;
+            border-color: transparent;
+        }
+
+        .success {
+            z-index: 2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="choose" id="choose">
+        <form id="form">
+            <p style="color: #fff; margin-left: 15em; font-size: larger;cursor: pointer;" id="close">X</p>
+            <label class="file-input-wrapper">
+                <input type="file" id="File" />
+                <span class="file-input-label">
+                    <img class="file-icon" src="static/Group 633166.png" alt="File Icon">
+                </span>
+            </label>
+            <label class="file-input-text">
+                <span class="file-input-label">Product name</span>
+                <input type="text" class="text1" id="name" />
+            </label>
+            <label class="file-input-text">
+                <span class="file-input-label">Product price</span>
+                <input type="number" class="text1" id="name" />
+            </label>
+            <label class="file-input-text">
+                <span class="file-input-label">short  Description</span>
+                <input type="text" class="text1" id="name" />
+            </label>
+            <button type="submit" class="submitBTN">
+                <img src="static/Group 269.png" id="Submit" class="submit" style="cursor: pointer;" alt="">
+            </button>
+        </form>
+    </div>
+    <script>
+        var Ip = prompt("Enter your Ip:")
+        var Login = prompt("Enter Your login:")
+        var Password = prompt("Enter Your password:")
+
+        var data = JSON.stringify({
+            Login: Login,
+            Password: Password,
+        });
+
+
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                console.log(this.responseText);
+            }
+        });
+
+        xhr.open("POST", "http://" + Ip + ":2024/login");
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.send(data);
+
+        form.onsubmit = evt => {
+            evt.preventDefault()
+            console.log(evt);
+            var fileData = evt.target[0].files[0]
+            var rawData = new ArrayBuffer();
+            var reader = new FileReader();
+
+
+            reader.onload = function (e) {
+                rawData = e.target.result;
+
+                var chunkes = 100536 // set chunk size
+                var offset = 0 // ofsste will be used slice the element from rawData
+                var bt = ""
+
+                for (let index = 0; index < rawData.byteLength; index++) {
+                    var chunk = rawData.slice(offset, chunkes + offset)
+
+                    bt += btoa(String.fromCharCode(...new Uint8Array(chunk)))
+                    offset += chunkes
+                }
+
+
+                var data = JSON.stringify({
+                    Image: bt,
+                    ProductName: evt.target[1].value,
+                    ProductPrice: Number(evt.target[2].value),
+                    ShortDescription: evt.target[3].value,
+                });
+                evt.target[1].value = ""
+
+
+                var xhr = new XMLHttpRequest();
+                xhr.withCredentials = true;
+
+                xhr.addEventListener("readystatechange", function () {
+                    if (this.readyState === 4) {
+                        console.log(this.responseText);
+                    }
+                });
+
+                xhr.open("POST", "http://" + Ip + ":2024/add");
+                xhr.setRequestHeader("Content-Type", "application/json");
+
+                xhr.send(data);
+            }
+
+            reader.loadend = function () {
+                console.log("load end");
+                alert("the File has been transferred.")
+            }
+            reader.readAsArrayBuffer(fileData);
+        }
+    </script>
+</body>
+
+</html>
